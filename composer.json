@@ -1,0 +1,30 @@
+{
+    "name": "Victor78/ZippyExt",
+    "type": "zippy-extension",
+
+    "description": "The 7-Zip integration for the Zippy.",
+    "keywords": ["zippy", "7zip", "7-zip", "archiver", "archivator", "archive", "zip"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Victor78",
+            "homepage": "http://victor78.com/"
+        }
+    ],    
+    "support": {
+        "issues": "https://github.com/Victor78/ZippyExt/issues",
+        "wiki": "https://github.com/Victor78/ZippyExt/wiki",
+        "source": "https://github.com/Victor78/ZippyExt"
+    },
+
+    "require": {
+        "php": "~7.1",
+        "alchemy/zippy": "~0.4.9"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "Victor78\\ZippyExt\\": "src/"
+        }
+    }
+}

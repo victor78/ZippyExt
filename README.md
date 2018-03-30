@@ -1,2 +1,3 @@
-# zippy-ext
-Adds to 'alchemy/zippy' 7zip functionality: archiving by using 7za with supporting passwords, aes256 etc.
+# ZippyExt
+
+This packet is the extension for Zippy (packet 'alchemy/zippy') with providing the strategy and the adapter for using 7-Zip, including supporting passwords.
