@@ -1,7 +1,7 @@
 {
     "name": "victor78/zippy-ext",
     "type": "zippy-extension",
-
+    "version": "0.0.1",
     "description": "The 7-Zip integration for the Zippy.",
     "keywords": ["zippy", "7zip", "7-zip", "archiver", "archivator", "archive", "zip"],
     "license": "MIT",
@@ -19,7 +19,8 @@
 
     "require": {
         "php": ">=7.0",
-        "alchemy/zippy": "~0.4.9"
+        "alchemy/zippy": "~0.4.9",
+        "symfony/process": "<4"
     },
 
     "autoload": {
