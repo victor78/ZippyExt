@@ -139,15 +139,15 @@ class AdapterContainer extends OldAdapterContainer
             return ZipExtensionAdapter::newInstance();
         };
         
-        $container['7za.inflator'] = null;
-        $container['7za.deflator'] = null;
+        $container['7zip.inflator'] = null;
+        $container['7zip.deflator'] = null;
         
-        $container['Victor78\\ZippyExt\\Adapter\\Zip7zaAdapter'] = function($container) {
-            return \Victor78\ZippyExt\Adapter\Zip7zaAdapter::newInstance(
+        $container['Victor78\\ZippyExt\\Adapter\\Zip7zipAdapter'] = function($container) {
+            return \Victor78\ZippyExt\Adapter\Zip7zipAdapter::newInstance(
                 $container['executable-finder'],
                 $container['resource-manager'],
-                $container['7za.inflator'],
-                $container['7za.deflator']
+                $container['7zip.inflator'],
+                $container['7zip.deflator']
             );
         }; 
         return $container;

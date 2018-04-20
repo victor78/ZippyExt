@@ -33,9 +33,9 @@ class ZippyTesting extends TestCase
         $zippy = Zippy::load();
         
         $rootFiles = $this->fileHelper->getLevelItems();
-        $archiveFile = $this->fileHelper->archiveDir.'/archive.zip';
+        $archiveFile = $this->fileHelper->archiveDir.'/archive.'.$this->ext;
         
-        $archiveZip = $zippy->create($archiveFile, $rootFiles, true, '7za');
+        $archiveZip = $zippy->create($archiveFile, $rootFiles, true, $this->type);
         $archiveClass = get_class($archiveZip);
         
         $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
@@ -275,6 +275,8 @@ class ZippyTesting extends TestCase
         $adapter = $zippy->getAdapterFor($this->type);
         $versionDeflator = $adapter->getDeflatorVersion();
         $versionInflator = $adapter->getInflatorVersion();
+        echo 'Deflator version is '.$versionDeflator.PHP_EOL;
+        echo 'Inflator version is '.$versionInflator.PHP_EOL;
         $this->assertTrue(is_numeric($versionDeflator));
         $this->assertTrue(is_numeric($versionInflator));
         $this->assertGreaterThan(0, $versionDeflator);

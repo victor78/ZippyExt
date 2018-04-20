@@ -17,7 +17,7 @@ use Alchemy\Zippy\Resource\ResourceManager;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Exception\ExceptionInterface as ProcessException;
 
-class Zip7zaAdapter extends AbstractBinaryAdapter
+class Zip7zipAdapter extends AbstractBinaryAdapter
 {
     private static $zipDateFormat = 'Y-m-d H:i';
     protected $password;
@@ -29,7 +29,7 @@ class Zip7zaAdapter extends AbstractBinaryAdapter
     ) {
         parent::__construct($parser, $manager, $inflator, $deflator);
 
-        $this->probe = new VersionProbe\Zip7zaVersionProbe($inflator, $deflator);
+        $this->probe = new VersionProbe\Zip7zipVersionProbe($inflator, $deflator);
     }
 
     /**
@@ -326,7 +326,7 @@ class Zip7zaAdapter extends AbstractBinaryAdapter
      */
     public static function getName()
     {
-        return '7za';
+        return '7zip';
     }
 
     /**

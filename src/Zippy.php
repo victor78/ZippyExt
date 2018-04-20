@@ -2,7 +2,7 @@
 
 namespace Victor78\ZippyExt;
 
-use Victor78\ZippyExt\FileStrategy\Zip7zaFileStrategy;
+use Victor78\ZippyExt\FileStrategy\Zip7zipFileStrategy;
 use Alchemy\Zippy\FileStrategy\{
     ZipFileStrategy,
     TarFileStrategy,
@@ -30,7 +30,7 @@ class Zippy extends \Alchemy\Zippy\Zippy
         $factory->addStrategy(new TB2FileStrategy($adapters));
         $factory->addStrategy(new TBz2FileStrategy($adapters));
         $factory->addStrategy(new TGzFileStrategy($adapters));
-        $factory->addStrategy(new Zip7zaFileStrategy($adapters));
+        $factory->addStrategy(new Zip7zipFileStrategy($adapters));
         return $factory;
     }   
     

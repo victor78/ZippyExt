@@ -5,7 +5,7 @@ namespace Victor78\ZippyExt\Adapter\VersionProbe;
 use Alchemy\Zippy\ProcessBuilder\ProcessBuilderFactoryInterface;
 use Alchemy\Zippy\Adapter\VersionProbe\VersionProbeInterface;
 
-class Zip7zaVersionProbe implements VersionProbeInterface
+class Zip7zipVersionProbe implements VersionProbeInterface
 {
     private $isSupported;
     private $inflator;

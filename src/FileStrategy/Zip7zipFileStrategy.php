@@ -2,7 +2,7 @@
 
 namespace Victor78\ZippyExt\FileStrategy;
 
-class Zip7zaFileStrategy extends \Alchemy\Zippy\FileStrategy\AbstractFileStrategy
+class Zip7zipFileStrategy extends \Alchemy\Zippy\FileStrategy\AbstractFileStrategy
 {
  
     /**
@@ -11,7 +11,7 @@ class Zip7zaFileStrategy extends \Alchemy\Zippy\FileStrategy\AbstractFileStrateg
     protected function getServiceNames()
     {
         return array(
-            'Victor78\\ZippyExt\\Adapter\\Zip7zaAdapter',
+            'Victor78\\ZippyExt\\Adapter\\Zip7zipAdapter',
         );
     }
 
@@ -20,6 +20,6 @@ class Zip7zaFileStrategy extends \Alchemy\Zippy\FileStrategy\AbstractFileStrateg
      */
     public function getFileExtension()
     {
-        return '7za';
+        return '7zip';
     }
 }

@@ -4,12 +4,16 @@ namespace tests\unit;
 
 require_once 'ZippyTesting.php';
 
-class Zippy7zipTest extends ZippyTesting
+class ZippyZipTest extends ZippyTesting
 {
     
     public function __construct() {
         parent::__construct();
-        $this->type = '7zip';
+        $this->type = 'zip';
         $this->ext = 'zip';
     }
+    
+    public function testRemoveMembersWithPassword() {
+        $this->assertTrue(true);
+    }       
 }
