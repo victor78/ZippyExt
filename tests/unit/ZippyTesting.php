@@ -6,10 +6,12 @@ require_once 'FileHelper.php';
 
 use Victor78\ZippyExt\Zippy;
 use PHPUnit\Framework\TestCase;
-class UserTest extends TestCase
+class ZippyTesting extends TestCase
 {
     const PASSWORD = '12321';
     public $fileHelper;
+    public $ext = 'zip';
+    public $type = 'zip';
     
     public function __construct() {
         parent::__construct();
@@ -47,9 +49,9 @@ class UserTest extends TestCase
         $zippy = Zippy::load();
         
         $files = $this->fileHelper->getLevelItems(1);
-        $archiveFile = $this->fileHelper->archiveDir.'/archive1.zip';
+        $archiveFile = $this->fileHelper->archiveDir.'/archive1.'.$this->ext;
         
-        $archiveZip = $zippy->create($archiveFile, $files, true, '7za');
+        $archiveZip = $zippy->create($archiveFile, $files, true, $this->type);
         $archiveClass = get_class($archiveZip);
         
         $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
@@ -70,9 +72,9 @@ class UserTest extends TestCase
             $configFiles[str_replace($this->fileHelper->arenaDir.'/', '', $file)] = $file;
         }
         
-        $archiveFile = $this->fileHelper->archiveDir.'/archive01.zip';
+        $archiveFile = $this->fileHelper->archiveDir.'/archive01.'.$this->ext;
         
-        $archiveZip = $zippy->create($archiveFile, $configFiles, true, '7za');
+        $archiveZip = $zippy->create($archiveFile, $configFiles, true, $this->type);
         $archiveClass = get_class($archiveZip);
         
         $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
@@ -87,9 +89,9 @@ class UserTest extends TestCase
         $zippy = Zippy::load();
         
         $files = $this->fileHelper->getLevelItems(2);
-        $archiveFile = $this->fileHelper->archiveDir.'/archive2.zip';
+        $archiveFile = $this->fileHelper->archiveDir.'/archive2.'.$this->ext;
         
-        $archiveZip = $zippy->create($archiveFile, $files, true, '7za');
+        $archiveZip = $zippy->create($archiveFile, $files, true, $this->type);
         $archiveClass = get_class($archiveZip);
         
         $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
@@ -103,9 +105,9 @@ class UserTest extends TestCase
         $zippy = Zippy::load();
         
         $files = $this->fileHelper->getLevelItems(0, 1, 1);
-        $archiveFile = $this->fileHelper->archiveDir.'/archive_all.zip';
+        $archiveFile = $this->fileHelper->archiveDir.'/archive_all.'.$this->ext;
         
-        $archiveZip = $zippy->create($archiveFile, $files, true, '7za');
+        $archiveZip = $zippy->create($archiveFile, $files, true, $this->type);
         $archiveClass = get_class($archiveZip);
         
         $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
@@ -119,9 +121,9 @@ class UserTest extends TestCase
         $zippy = Zippy::load();
         
         $files = $this->fileHelper->getLevelItems(0, 1, 1);
-        $archiveFile = $this->fileHelper->archiveDir.'/archive_all_pwd.zip';
+        $archiveFile = $this->fileHelper->archiveDir.'/archive_all_pwd.'.$this->ext;
         
-        $archiveZip = $zippy->create($archiveFile, $files, true, '7za', self::PASSWORD);
+        $archiveZip = $zippy->create($archiveFile, $files, true, $this->type, self::PASSWORD);
         $archiveClass = get_class($archiveZip);
         
         $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
@@ -135,9 +137,9 @@ class UserTest extends TestCase
         $zippy = Zippy::load();
         
         $rootFiles = $this->fileHelper->getLevelItems();
-        $archiveFile = $this->fileHelper->archiveDir.'/archive_add.zip';
+        $archiveFile = $this->fileHelper->archiveDir.'/archive_add.'.$this->ext;
         
-        $archiveZip = $zippy->create($archiveFile, $rootFiles, true, '7za');
+        $archiveZip = $zippy->create($archiveFile, $rootFiles, true, $this->type);
         $archiveClass = get_class($archiveZip);
         
         $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
@@ -154,9 +156,9 @@ class UserTest extends TestCase
         $zippy = Zippy::load();
         
         $rootFiles = $this->fileHelper->getLevelItems();
-        $archiveFile = $this->fileHelper->archiveDir.'/archive_add_pwd.zip';
+        $archiveFile = $this->fileHelper->archiveDir.'/archive_add_pwd.'.$this->ext;
         
-        $archiveZip = $zippy->create($archiveFile, $rootFiles, true, '7za', self::PASSWORD);
+        $archiveZip = $zippy->create($archiveFile, $rootFiles, true, $this->type, self::PASSWORD);
         $archiveClass = get_class($archiveZip);
         
         $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
@@ -171,10 +173,10 @@ class UserTest extends TestCase
     public function testRemoveMembersWithPassword()
     {
         $zippy = Zippy::load();
-        $archiveSource = $this->fileHelper->assetsDir.'/add/archive_add_pwd.zip';
-        $archiveDest = $this->fileHelper->archiveDir.'/archive_add_pwd_removing.zip';
+        $archiveSource = $this->fileHelper->assetsDir.'/add/'.$this->type.'/archive_add_pwd.'.$this->ext;
+        $archiveDest = $this->fileHelper->archiveDir.'/archive_add_pwd_removing.'.$this->ext;
         copy($archiveSource, $archiveDest);
-        $archiveZip = $zippy->open($archiveDest, '7za', self::PASSWORD);
+        $archiveZip = $zippy->open($archiveDest, $this->type, self::PASSWORD);
         $archiveClass = get_class($archiveZip);
         
         $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
@@ -193,10 +195,10 @@ class UserTest extends TestCase
     public function testRemoveMembersWithoutPassword()
     {
         $zippy = Zippy::load();
-        $archiveSource = $this->fileHelper->assetsDir.'/add/archive_add.zip';
-        $archiveDest = $this->fileHelper->archiveDir.'/archive_add_removing.zip';
+        $archiveSource = $this->fileHelper->assetsDir.'/add/'.$this->type.'/archive_add.'.$this->ext;
+        $archiveDest = $this->fileHelper->archiveDir.'/archive_add_removing.'.$this->ext;
         copy($archiveSource, $archiveDest);
-        $archiveZip = $zippy->open($archiveDest, '7za');
+        $archiveZip = $zippy->open($archiveDest, $this->type);
         $archiveClass = get_class($archiveZip);
         
         $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
@@ -215,10 +217,10 @@ class UserTest extends TestCase
     public function testExtract()
     {
         $zippy = Zippy::load();
-        $archiveSource = $this->fileHelper->assetsDir.'/add/archive_all.zip';
-        $archiveDest = $this->fileHelper->archiveDir.'/archive_extracting.zip';
+        $archiveSource = $this->fileHelper->assetsDir.'/add/'.$this->type.'/archive_all.'.$this->ext;
+        $archiveDest = $this->fileHelper->archiveDir.'/archive_extracting.'.$this->ext;
         copy($archiveSource, $archiveDest);
-        $archiveZip = $zippy->open($archiveDest, '7za');
+        $archiveZip = $zippy->open($archiveDest, $this->type);
         $archiveClass = get_class($archiveZip);
         
         $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
@@ -242,10 +244,10 @@ class UserTest extends TestCase
     public function testExtractMembers()
     {
         $zippy = Zippy::load();
-        $archiveSource = $this->fileHelper->assetsDir.'/add/archive_all.zip';
-        $archiveDest = $this->fileHelper->archiveDir.'/archive_extracting.zip';
+        $archiveSource = $this->fileHelper->assetsDir.'/add/'.$this->type.'/archive_all.'.$this->ext;
+        $archiveDest = $this->fileHelper->archiveDir.'/archive_extracting.'.$this->ext;
         copy($archiveSource, $archiveDest);
-        $archiveZip = $zippy->open($archiveDest, '7za');
+        $archiveZip = $zippy->open($archiveDest, $this->type);
         $archiveClass = get_class($archiveZip);
         
         $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
@@ -270,10 +272,12 @@ class UserTest extends TestCase
     public function testGetVersion()
     {
         $zippy = Zippy::load();
-        $adapter = $zippy->getAdapterFor('7za');
-        $version = $adapter->getDeflatorVersion();
-        $this->assertTrue(is_numeric($version));
-        $this->assertGreaterThan(0, $version);
+        $adapter = $zippy->getAdapterFor($this->type);
+        $versionDeflator = $adapter->getDeflatorVersion();
+        $versionInflator = $adapter->getInflatorVersion();
+        $this->assertTrue(is_numeric($versionDeflator));
+        $this->assertTrue(is_numeric($versionInflator));
+        $this->assertGreaterThan(0, $versionDeflator);
+        $this->assertGreaterThan(0, $versionInflator);
     }
-
 }
