@@ -1,7 +1,7 @@
 {
     "name": "victor78/zippy-ext",
     "type": "zippy-extension",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "The 7-Zip integration for the Zippy.",
     "keywords": ["zippy", "7zip", "7-zip", "archiver", "archivator", "archive", "zip"],
     "license": "MIT",
