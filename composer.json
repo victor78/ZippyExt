@@ -12,9 +12,9 @@
         }
     ],    
     "support": {
-        "issues": "https://github.com/Victor78/ZippyExt/issues",
-        "wiki": "https://github.com/Victor78/ZippyExt/wiki",
-        "source": "https://github.com/Victor78/ZippyExt"
+        "issues": "https://github.com/victor78/ZippyExt/issues",
+        "wiki": "https://github.com/victor78/ZippyExt/wiki",
+        "source": "https://github.com/victor78/ZippyExt"
     },
 
     "require": {
