@@ -6,7 +6,7 @@ use Alchemy\Zippy\Adapter\{
     Resource\ResourceInterface,
     AbstractBinaryAdapter
 };
-use Alchemy\Zippy\Archive\Archive;
+use Victor78\ZippyExt\Archive\Archive;
 use Alchemy\Zippy\Archive\Member;
 use Alchemy\Zippy\Exception\{
 InvalidArgumentException, NotSupportedException, RuntimeException};
@@ -35,7 +35,7 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
     /**
      * @inheritdoc
      */
-    protected function doCreate($path, $files, $recursive, $password = null)
+    protected function doCreate($path, $files, $recursive)
     {
         $files = (array) $files;
 
@@ -377,7 +377,7 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
         $builder->add('-y');
         
         $process = $builder->getProcess();
-
+        
         $process->run();
 
         if (!$process->isSuccessful()) {

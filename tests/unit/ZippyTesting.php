@@ -36,9 +36,8 @@ class ZippyTesting extends TestCase
         $archiveFile = $this->fileHelper->archiveDir.'/archive.'.$this->ext;
         
         $archiveZip = $zippy->create($archiveFile, $rootFiles, true, $this->type);
-        $archiveClass = get_class($archiveZip);
         
-        $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
+        $this->assertTrue($archiveZip instanceof \Alchemy\Zippy\Archive\ArchiveInterface);
         
         $isArchiveExists = file_exists($archiveFile);
         $this->assertTrue($isArchiveExists);
@@ -52,9 +51,8 @@ class ZippyTesting extends TestCase
         $archiveFile = $this->fileHelper->archiveDir.'/archive1.'.$this->ext;
         
         $archiveZip = $zippy->create($archiveFile, $files, true, $this->type);
-        $archiveClass = get_class($archiveZip);
         
-        $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
+        $this->assertTrue($archiveZip instanceof \Alchemy\Zippy\Archive\ArchiveInterface);
         
         $isArchiveExists = file_exists($archiveFile);
         $this->assertTrue($isArchiveExists);
@@ -75,9 +73,8 @@ class ZippyTesting extends TestCase
         $archiveFile = $this->fileHelper->archiveDir.'/archive01.'.$this->ext;
         
         $archiveZip = $zippy->create($archiveFile, $configFiles, true, $this->type);
-        $archiveClass = get_class($archiveZip);
         
-        $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
+        $this->assertTrue($archiveZip instanceof \Alchemy\Zippy\Archive\ArchiveInterface);
         
         $isArchiveExists = file_exists($archiveFile);
         $this->assertTrue($isArchiveExists);
@@ -92,9 +89,8 @@ class ZippyTesting extends TestCase
         $archiveFile = $this->fileHelper->archiveDir.'/archive2.'.$this->ext;
         
         $archiveZip = $zippy->create($archiveFile, $files, true, $this->type);
-        $archiveClass = get_class($archiveZip);
         
-        $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
+        $this->assertTrue($archiveZip instanceof \Alchemy\Zippy\Archive\ArchiveInterface);
         
         $isArchiveExists = file_exists($archiveFile);
         $this->assertTrue($isArchiveExists);
@@ -108,9 +104,8 @@ class ZippyTesting extends TestCase
         $archiveFile = $this->fileHelper->archiveDir.'/archive_all.'.$this->ext;
         
         $archiveZip = $zippy->create($archiveFile, $files, true, $this->type);
-        $archiveClass = get_class($archiveZip);
         
-        $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
+        $this->assertTrue($archiveZip instanceof \Alchemy\Zippy\Archive\ArchiveInterface);
         
         $isArchiveExists = file_exists($archiveFile);
         $this->assertTrue($isArchiveExists);
@@ -124,9 +119,8 @@ class ZippyTesting extends TestCase
         $archiveFile = $this->fileHelper->archiveDir.'/archive_all_pwd.'.$this->ext;
         
         $archiveZip = $zippy->create($archiveFile, $files, true, $this->type, self::PASSWORD);
-        $archiveClass = get_class($archiveZip);
         
-        $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
+        $this->assertTrue($archiveZip instanceof \Alchemy\Zippy\Archive\ArchiveInterface);
         
         $isArchiveExists = file_exists($archiveFile);
         $this->assertTrue($isArchiveExists);
@@ -140,9 +134,8 @@ class ZippyTesting extends TestCase
         $archiveFile = $this->fileHelper->archiveDir.'/archive_add.'.$this->ext;
         
         $archiveZip = $zippy->create($archiveFile, $rootFiles, true, $this->type);
-        $archiveClass = get_class($archiveZip);
         
-        $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
+        $this->assertTrue($archiveZip instanceof \Alchemy\Zippy\Archive\ArchiveInterface);
         
         $isArchiveExists = file_exists($archiveFile);
         $this->assertTrue($isArchiveExists);
@@ -159,9 +152,8 @@ class ZippyTesting extends TestCase
         $archiveFile = $this->fileHelper->archiveDir.'/archive_add_pwd.'.$this->ext;
         
         $archiveZip = $zippy->create($archiveFile, $rootFiles, true, $this->type, self::PASSWORD);
-        $archiveClass = get_class($archiveZip);
         
-        $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
+        $this->assertTrue($archiveZip instanceof \Alchemy\Zippy\Archive\ArchiveInterface);
         
         $isArchiveExists = file_exists($archiveFile);
         $this->assertTrue($isArchiveExists);
@@ -199,9 +191,8 @@ class ZippyTesting extends TestCase
         $archiveDest = $this->fileHelper->archiveDir.'/archive_add_removing.'.$this->ext;
         copy($archiveSource, $archiveDest);
         $archiveZip = $zippy->open($archiveDest, $this->type);
-        $archiveClass = get_class($archiveZip);
         
-        $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
+        $this->assertTrue($archiveZip instanceof \Alchemy\Zippy\Archive\ArchiveInterface);
         $members = $archiveZip->getMembers();
         $countMembersBegin = count($members);
         $this->assertGreaterThan(0, $countMembersBegin, 'Количество членов должно быть больше 0');
@@ -221,9 +212,8 @@ class ZippyTesting extends TestCase
         $archiveDest = $this->fileHelper->archiveDir.'/archive_extracting.'.$this->ext;
         copy($archiveSource, $archiveDest);
         $archiveZip = $zippy->open($archiveDest, $this->type);
-        $archiveClass = get_class($archiveZip);
         
-        $this->assertSame($archiveClass, \Alchemy\Zippy\Archive\Archive::class);
+        $this->assertTrue($archiveZip instanceof \Alchemy\Zippy\Archive\ArchiveInterface);
         $extractingFolder = $this->fileHelper->makeArenaFolder('extracting');
         $archiveZip->extract($extractingFolder);
         $items = scandir($extractingFolder);
@@ -240,6 +230,30 @@ class ZippyTesting extends TestCase
         
         $this->assertTrue($ok1);
         $this->assertTrue($ok2);
+    }
+    
+    public function testExtractWithPassword()
+    {
+        $zippy = Zippy::load();
+        $archiveSource = $this->fileHelper->assetsDir.'/add/'.$this->type.'/archive_add_pwd.'.$this->ext;
+        $archiveDest = $this->fileHelper->archiveDir.'/archive_extracting.'.$this->ext;
+        copy($archiveSource, $archiveDest);
+        $archiveZip = $zippy->open($archiveDest, $this->type,  self::PASSWORD);
+        
+        $this->assertTrue($archiveZip instanceof \Alchemy\Zippy\Archive\ArchiveInterface);
+        $extractingFolder = $this->fileHelper->makeArenaFolder('extracting');
+        $archiveZip->extract($extractingFolder);
+        $items = scandir($extractingFolder);
+        $items = array_filter($items, function($item){
+            return ($item != '.' && $item != '..');
+        });
+        
+        $ok1 = in_array('file1.txt', $items) 
+            && in_array('file2.txt', $items) 
+            && in_array('file3.txt', $items)
+            && in_array('added.txt', $items);
+        
+        $this->assertTrue($ok);
     }
     public function testExtractMembers()
     {
