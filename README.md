@@ -87,6 +87,12 @@ And if you want to create the encrypted archive, you can use fifth parameter:
 // Creates an archive.zip with AES-256 encryption and your password 
 $archive = $zippy->create('archive.zip', $files, true, '7zip', 'some_your_password');
 ```
+To extract 7zip with password:
+```php
+//open archive with your password
+$archive = $zippy->open('archive.zip', '7zip',  'some_your_password');
+$archiveZip->extract('folder_for_extracted');
+```
 
 ## Documentation
 
