@@ -1,10 +1,23 @@
 # ZippyExt
+
+[![CI](https://github.com/victor78/ZippyExt/actions/workflows/ci.yml/badge.svg)](https://github.com/victor78/ZippyExt/actions/workflows/ci.yml)
+[![Latest Stable Version](https://poser.pugx.org/victor78/zippy-ext/v/stable)](https://packagist.org/packages/victor78/zippy-ext)
+[![License](https://poser.pugx.org/victor78/zippy-ext/license)](https://packagist.org/packages/victor78/zippy-ext)
+[![Total Downloads](https://poser.pugx.org/victor78/zippy-ext/downloads)](https://packagist.org/packages/victor78/zippy-ext)
+
 ZippyExt (aka ZippyExtended) is a library extended over [Zippy](https://github.com/alchemy-fr/Zippy) providing the strategy and adapter for using 7-Zip, including password support.
 
 ## Requirements
 
-- PHP >= 7.0
+- PHP >= 8.1
 - [7-Zip](https://www.7-zip.org/) (`7za` binary in `PATH`) — required only for 7zip adapter
+
+## PHP Compatibility
+
+| ZippyExt | PHP      |
+|----------|----------|
+| 1.x      | 8.1–8.3  |
+| 0.x      | 7.0+     |
 
 ## Installation
 

@@ -1,11 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Victor78\ZippyExt;
 
-use Alchemy\Zippy\Exception\{
-    ExceptionInterface,
-    RuntimeException
-};
+use Alchemy\Zippy\Exception\ExceptionInterface;
+use Alchemy\Zippy\Exception\RuntimeException;
 use Victor78\ZippyExt\FileStrategy\Zip7zipFileStrategy;
 use Alchemy\Zippy\FileStrategy\{
     ZipFileStrategy,
@@ -16,14 +16,13 @@ use Alchemy\Zippy\FileStrategy\{
     TBz2FileStrategy,
     TGzFileStrategy
 };
-
+use Alchemy\Zippy\Archive\ArchiveInterface;
 
 class Zippy extends \Alchemy\Zippy\Zippy
 {
-    public static function load()
+    public static function load(): static
     {
         $adapters = Adapter\AdapterContainer::load();
-
 
         $factory = new static($adapters);
 
@@ -35,22 +34,23 @@ class Zippy extends \Alchemy\Zippy\Zippy
         $factory->addStrategy(new TBz2FileStrategy($adapters));
         $factory->addStrategy(new TGzFileStrategy($adapters));
         $factory->addStrategy(new Zip7zipFileStrategy($adapters));
+
         return $factory;
-    }   
-    
-    private function sanitizeExtension($extension)
+    }
+
+    private function sanitizeExtension(string $extension): string
     {
         return ltrim(trim(mb_strtolower($extension)), '.');
     }
+
     /**
-     * Creates an archive
+     * Creates an archive.
      *
      * @param string                         $path
      * @param string|array|\Traversable|null $files
      * @param bool                           $recursive
      * @param string|null                    $type
-     *
-     * @return ArchiveInterface
+     * @param string|null                    $password
      *
      * @throws RuntimeException In case of failure
      */
@@ -60,26 +60,23 @@ class Zippy extends \Alchemy\Zippy\Zippy
             $type = $this->guessAdapterExtension($path);
         }
 
-        
-        
         try {
-            $adapter = $this->getAdapterFor($this->sanitizeExtension($type));
+            $adapter = $this->getAdapterFor($this->sanitizeExtension((string) $type));
             if (method_exists($adapter, 'setPassword')) {
-                // Explicitly set/reset password to avoid leaking state between operations.
                 $adapter->setPassword($password);
             }
             return $adapter->create($path, $files, $recursive);
         } catch (ExceptionInterface $e) {
             throw new RuntimeException('Unable to create archive', $e->getCode(), $e);
         }
-    }    
+    }
 
     /**
      * Opens an archive.
      *
-     * @param string $path
-     *
-     * @return ArchiveInterface
+     * @param string      $path
+     * @param string|null $type
+     * @param string|null $password
      *
      * @throws RuntimeException In case of failure
      */
@@ -90,9 +87,8 @@ class Zippy extends \Alchemy\Zippy\Zippy
         }
 
         try {
-            $adapter = $this->getAdapterFor($this->sanitizeExtension($type));
+            $adapter = $this->getAdapterFor($this->sanitizeExtension((string) $type));
             if (method_exists($adapter, 'setPassword')) {
-                // Explicitly set/reset password to avoid leaking state between operations.
                 $adapter->setPassword($password);
             }
             return $adapter->open($path);
@@ -100,17 +96,12 @@ class Zippy extends \Alchemy\Zippy\Zippy
             throw new RuntimeException('Unable to open archive', $e->getCode(), $e);
         }
     }
-    
+
     /**
-     * Finds an extension that has strategy registered given a file path
-     *
+     * Finds an extension that has a strategy registered given a file path.
      * Returns null if no matching strategy found.
-     *
-     * @param string $path
-     *
-     * @return string|null
      */
-    private function guessAdapterExtension($path)
+    private function guessAdapterExtension(string $path): ?string
     {
         $path = strtolower(trim($path));
         foreach ($this->getStrategies() as $extension => $strategy) {
@@ -120,5 +111,5 @@ class Zippy extends \Alchemy\Zippy\Zippy
         }
 
         return null;
-    }    
+    }
 }

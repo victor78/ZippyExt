@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Victor78\ZippyExt\Adapter\VersionProbe;
 
 use Alchemy\Zippy\ProcessBuilder\ProcessBuilderFactoryInterface;
@@ -7,23 +9,17 @@ use Alchemy\Zippy\Adapter\VersionProbe\VersionProbeInterface;
 
 class Zip7zipVersionProbe implements VersionProbeInterface
 {
-    private $isSupported;
-    private $inflator;
-    private $deflator;
+    private ?int $isSupported = null;
 
-    public function __construct(ProcessBuilderFactoryInterface $inflator, ProcessBuilderFactoryInterface $deflator)
-    {
-        $this->inflator = $inflator;
-        $this->deflator = $deflator;
-    }
+    public function __construct(
+        private ProcessBuilderFactoryInterface $inflator,
+        private ProcessBuilderFactoryInterface $deflator
+    ) {}
 
     /**
      * Set the inflator to zip
-     *
-     * @param  ProcessBuilderFactoryInterface $inflator
-     * @return ZipVersionProbe
      */
-    public function setInflator(ProcessBuilderFactoryInterface $inflator)
+    public function setInflator(ProcessBuilderFactoryInterface $inflator): static
     {
         $this->inflator = $inflator;
 
@@ -32,11 +28,8 @@ class Zip7zipVersionProbe implements VersionProbeInterface
 
     /**
      * Set the deflator to unzip
-     *
-     * @param  ProcessBuilderFactoryInterface $deflator
-     * @return ZipVersionProbe
      */
-    public function setDeflator(ProcessBuilderFactoryInterface $deflator)
+    public function setDeflator(ProcessBuilderFactoryInterface $deflator): static
     {
         $this->deflator = $deflator;
 
@@ -46,33 +39,25 @@ class Zip7zipVersionProbe implements VersionProbeInterface
     /**
      * {@inheritdoc}
      */
-    public function getStatus()
+    public function getStatus(): int
     {
-        
-        if (null !== $this->isSupported) {
+        if ($this->isSupported !== null) {
             return $this->isSupported;
         }
 
-        if (null === $this->inflator) {
-            return $this->isSupported = VersionProbeInterface::PROBE_NOTSUPPORTED;
-        }
-
-
-        $processInflate = $this
-            ->inflator
-            ->create()
-            ->getProcess();
-
+        $processInflate = $this->inflator->create()->getProcess();
         $processInflate->run();
 
         if (false === $processInflate->isSuccessful()) {
             return $this->isSupported = VersionProbeInterface::PROBE_NOTSUPPORTED;
         }
-        $output = $processInflate->getOutput();
 
+        $output = $processInflate->getOutput();
         $inflatorOk = false !== stripos($output, '7-Zip');
 
 
-        return $this->isSupported = ($inflatorOk) ? VersionProbeInterface::PROBE_OK : VersionProbeInterface::PROBE_NOTSUPPORTED;
+        return $this->isSupported = $inflatorOk
+            ? VersionProbeInterface::PROBE_OK
+            : VersionProbeInterface::PROBE_NOTSUPPORTED;
     }
 }
