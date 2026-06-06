@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit bootstrap="./tests/bootstrap.php"
          colors="true"
-         verbose="true"
-         convertErrorsToExceptions="true"
-         convertNoticesToExceptions="true"
-         convertWarningsToExceptions="true"
          processIsolation="false"
          stopOnFailure="false">
     <testsuites>
@@ -12,9 +8,14 @@
             <directory>./tests</directory>
         </testsuite>
     </testsuites>
+    <source restrictDeprecations="true">
+        <include>
+            <directory>src</directory>
+        </include>
+    </source>
     <php>
-        <var name='assets' value='./tests/assets' />
-        <var name='files_arena' value='./tests/files_arena' />
-        <var name='archives_arena' value='./tests/archives_arena' />
+        <var name="assets" value="./tests/assets"/>
+        <var name="files_arena" value="./tests/files_arena"/>
+        <var name="archives_arena" value="./tests/archives_arena"/>
     </php>
 </phpunit>

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Victor78\ZippyExt\Adapter;
 
 use Alchemy\Zippy\Adapter\{
@@ -8,10 +10,9 @@ use Alchemy\Zippy\Adapter\{
 };
 use Victor78\ZippyExt\Archive\Archive;
 use Alchemy\Zippy\Archive\Member;
-use Alchemy\Zippy\Exception\{
-InvalidArgumentException, NotSupportedException, RuntimeException};
+use Alchemy\Zippy\Exception\{InvalidArgumentException, NotSupportedException, RuntimeException};
 use Alchemy\Zippy\Parser\{ParserInterface, ZipOutputParser};
-use Alchemy\Zippy\ProcessBuilder\{ProcessBuilderFactoryInterface,ProcessBuilderFactory};
+use Alchemy\Zippy\ProcessBuilder\{ProcessBuilderFactoryInterface, ProcessBuilderFactory};
 use Alchemy\Zippy\Resource\Resource as ZippyResource;
 use Alchemy\Zippy\Resource\ResourceManager;
 use Symfony\Component\Process\ExecutableFinder;
@@ -19,8 +20,9 @@ use Symfony\Component\Process\Exception\ExceptionInterface as ProcessException;
 
 class Zip7zipAdapter extends AbstractBinaryAdapter
 {
-    private static $zipDateFormat = 'Y-m-d H:i';
-    protected $password;
+    private static string $zipDateFormat = 'Y-m-d H:i';
+    protected ?string $password = null;
+
     public function __construct(
         ParserInterface $parser,
         ResourceManager $manager,
@@ -32,29 +34,29 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
         $this->probe = new VersionProbe\Zip7zipVersionProbe($inflator, $deflator);
     }
 
-    /**
-     * @inheritdoc
-     */
-    protected function doCreate($path, $files, $recursive)
+    public function setPassword(?string $password): void
+    {
+        $this->password = $password;
+    }
+
+    protected function doCreate($path, $files, $recursive): Archive
     {
         $files = (array) $files;
 
-        $builder = $this
-            ->inflator
-            ->create()
-            ->add('a')
-            ->add('-tzip');  
         if (0 === count($files)) {
             throw new NotSupportedException('Can not create empty zip archive');
         }
+
+        $builder = $this->inflator->create()
+            ->add('a')
+            ->add('-tzip');
 
         if ($recursive) {
             $builder->add('-r');
         }
 
-        if ($this->password){
-                      
-            $builder->add('-p'.$this->password);            
+        if ($this->password !== null) {
+            $builder->add('-p' . $this->password);
             $builder->add('-mem=AES256');
         }
 
@@ -63,7 +65,7 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
         $collection = $this->manager->handle(getcwd(), $files);
         $builder->setWorkingDirectory($collection->getContext());
 
-        $collection->forAll(function($i, ZippyResource $resource) use ($builder) {
+        $collection->forAll(function ($i, ZippyResource $resource) use ($builder) {
             return $builder->add($resource->getTarget());
         });
 
@@ -89,18 +91,9 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
         return new Archive($this->createResource($path), $this, $this->manager);
     }
 
-    public function setPassword($password){
-        $this->password = $password;
-    }
-    
-    /**
-     * @inheritdoc
-     */
-    protected function doListMembers(ResourceInterface $resource)
+    protected function doListMembers(ResourceInterface $resource): array
     {
-        $process = $this
-            ->deflator
-            ->create()
+        $process = $this->deflator->create()
             ->add('l')
             ->add($resource->getResource())
             ->getProcess();
@@ -115,8 +108,8 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
             ));
         }
 
-        $members = array();
-        
+        $members = [];
+
         foreach ($this->parseFileListing($process->getOutput() ?: '') as $member) {
             $members[] = new Member(
                 $resource,
@@ -130,19 +123,21 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
 
         return $members;
     }
-    public function parseFileListing($output)
+
+    public function parseFileListing(string $output): array
     {
         $lines = array_values(array_filter(explode("\n", $output)));
         array_shift($lines);
         array_shift($lines);
         array_shift($lines);
-        $members = array();
+        $members = [];
 
         foreach ($lines as $line) {
-            $matches = array();
+            $matches = [];
 
             // 2018-04-03 21:56:00 .....            5           33  added.txt
-            if (!preg_match_all('/([0-9]{4}-[0-9]{2}-[0-9]{2}) ([0-9]{2}:[0-9]{2}:[0-9]{2}) ([^ ]*) *([0-9]*) *([0-9]*) *(.*)/',
+            if (!preg_match_all(
+                '/([0-9]{4}-[0-9]{2}-[0-9]{2}) ([0-9]{2}:[0-9]{2}:[0-9]{2}) ([^ ]*) *([0-9]*) *([0-9]*) *(.*)/',
                 $line, $matches, PREG_SET_ORDER
             )) {
                 continue;
@@ -153,57 +148,49 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
             if (7 !== count($chunks)) {
                 continue;
             }
-            $date = $chunks[1].' '.$chunks[2];
+
+            $date = $chunks[1] . ' ' . $chunks[2];
             $mtime = \DateTime::createFromFormat('Y-m-d H:i:s', $date);
 
             if ($mtime === false) {
                 $mtime = \DateTime::createFromFormat('H:i Y-m-d', $date);
-
                 if ($mtime === false) {
                     $mtime = new \DateTime($date);
-                }                
+                }
             }
 
-            $members[] = array(
-                'location'  => $chunks[6],
-                'size'      => $chunks[4],
-                'mtime'     => $mtime,
-                'is_dir'    => '/' === substr($chunks[6], -1)
-            );
+            $members[] = [
+                'location' => $chunks[6],
+                'size'     => $chunks[4],
+                'mtime'    => $mtime,
+                'is_dir'   => '/' === substr($chunks[6], -1),
+            ];
         }
 
         return $members;
     }
-    /**
-     * @inheritdoc
-     */
-    protected function doAdd(ResourceInterface $resource, $files, $recursive)
+
+    protected function doAdd(ResourceInterface $resource, $files, $recursive): void
     {
         $files = (array) $files;
 
-        $builder = $this
-            ->inflator
-            ->create();
+        $builder = $this->inflator->create();
 
         if ($recursive) {
             $builder->add('-r');
         }
-        
-        
-        if ($this->password){
-                      
-            $builder->add('-p'.$this->password);            
+
+        if ($this->password !== null) {
+            $builder->add('-p' . $this->password);
             $builder->add('-mem=AES256');
         }
-        $builder
-            ->add('u')
-            ->add($resource->getResource());
+
+        $builder->add('u')->add($resource->getResource());
 
         $collection = $this->manager->handle(getcwd(), $files);
-
         $builder->setWorkingDirectory($collection->getContext());
 
-        $collection->forAll(function($i, ZippyResource $resource) use ($builder) {
+        $collection->forAll(function ($i, ZippyResource $resource) use ($builder) {
             return $builder->add($resource->getTarget());
         });
 
@@ -227,16 +214,9 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
         }
     }
 
-    /**
-     * @inheritdoc
-     */
-    protected function doGetDeflatorVersion()
+    protected function doGetDeflatorVersion(): ?string
     {
-        $process = $this
-            ->deflator
-            ->create()
-            ->getProcess();
-
+        $process = $this->deflator->create()->getProcess();
         $process->run();
 
         if (!$process->isSuccessful()) {
@@ -249,8 +229,8 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
 
         return $this->parseVersion($process->getOutput() ?: '');
     }
-    
-    public function parseVersion($output)
+
+    public function parseVersion(string $output): ?string
     {
         if (preg_match('/\b(\d+(?:\.\d+)+)\b/', $output, $matches)) {
             return $matches[1];
@@ -259,16 +239,9 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
         return null;
     }
 
-    /**
-     * @inheritdoc
-     */
-    protected function doGetInflatorVersion()
+    protected function doGetInflatorVersion(): ?string
     {
-        $process = $this
-            ->inflator
-            ->create()
-            ->getProcess();
-
+        $process = $this->inflator->create()->getProcess();
         $process->run();
 
         if (!$process->isSuccessful()) {
@@ -282,18 +255,11 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
         return $this->parseVersion($process->getOutput() ?: '');
     }
 
-    /**
-     * @inheritdoc
-     */
-    protected function doRemove(ResourceInterface $resource, $files)
+    protected function doRemove(ResourceInterface $resource, $files): array
     {
         $files = (array) $files;
 
-        $builder = $this
-            ->inflator
-            ->create();
-
-        $builder
+        $builder = $this->inflator->create()
             ->add('d')
             ->add($resource->getResource());
 
@@ -302,7 +268,6 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
         }
 
         $process = $builder->getProcess();
-
         $process->run();
 
         if (!$process->isSuccessful()) {
@@ -316,63 +281,43 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
         return $files;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public static function getName()
+    public static function getName(): string
     {
         return '7zip';
     }
 
-    /**
-     * @inheritdoc
-     */
-    public static function getDefaultDeflatorBinaryName()
+    public static function getDefaultDeflatorBinaryName(): array
     {
-        return array('7za');
+        return ['7za'];
     }
 
-    /**
-     * @inheritdoc
-     */
-    public static function getDefaultInflatorBinaryName()
+    public static function getDefaultInflatorBinaryName(): array
     {
-        return array('7za');
+        return ['7za'];
     }
 
-    /**
-     * @inheritdoc
-     */
-    protected function doExtract(ResourceInterface $resource, $to)
+    protected function doExtract(ResourceInterface $resource, $to): \SplFileInfo
     {
         if (null !== $to && !is_dir($to)) {
-            throw new InvalidArgumentException(sprintf("%s is not a directory", $to));
+            throw new InvalidArgumentException(sprintf('%s is not a directory', $to));
         }
 
-        $builder = $this
-            ->deflator
-            ->create();
-
-        $builder
+        $builder = $this->deflator->create()
             ->add('x')
             ->add($resource->getResource());
 
         if (null !== $to) {
-            $builder
-                ->add('-o'.$to); //required do it sticky
+            $builder->add('-o' . $to);
         }
-        
-        
-        if ($this->password){
-                      
-            $builder->add('-p'.$this->password);            
+
+        if ($this->password !== null) {
+            $builder->add('-p' . $this->password);
             $builder->add('-mem=AES256');
         }
-        
+
         $builder->add('-y');
-        
+
         $process = $builder->getProcess();
-        
         $process->run();
 
         if (!$process->isSuccessful()) {
@@ -386,70 +331,56 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
         return new \SplFileInfo($to ?: $resource->getResource());
     }
 
-    /**
-     * @inheritdoc
-     */
-    protected function doExtractMembers(ResourceInterface $resource, $members, $to, $overwrite = false)
+    protected function doExtractMembers(ResourceInterface $resource, $members, $to, $overwrite = false): never
     {
-        throw new \DomainException('Impossible to extract members with 7za.');
+        throw new \DomainException('Impossible to extract members with 7za. Use extract() instead.');
     }
-    
-    /**
-     * Returns a new instance of the invoked adapter
-     *
-     * @param ExecutableFinder $finder
-     * @param ResourceManager  $manager
-     * @param string|null      $inflatorBinaryName The inflator binary name to use
-     * @param string|null      $deflatorBinaryName The deflator binary name to use
-     *
-     * @return AbstractBinaryAdapter
-     */
+
     public static function newInstance(
         ExecutableFinder $finder,
         ResourceManager $manager,
         $inflatorBinaryName = null,
         $deflatorBinaryName = null
-    ) {
-        
+    ): static {
+        $inflator = $inflatorBinaryName instanceof ProcessBuilderFactoryInterface
+            ? $inflatorBinaryName
+            : self::findABinary($inflatorBinaryName, static::getDefaultInflatorBinaryName(), $finder);
 
-        $inflator = $inflatorBinaryName instanceof ProcessBuilderFactoryInterface ? $inflatorBinaryName : self::findABinary($inflatorBinaryName,
-            static::getDefaultInflatorBinaryName(), $finder);
-        $deflator = $deflatorBinaryName instanceof ProcessBuilderFactoryInterface ? $deflatorBinaryName : self::findABinary($deflatorBinaryName,
-            static::getDefaultDeflatorBinaryName(), $finder);
+        $deflator = $deflatorBinaryName instanceof ProcessBuilderFactoryInterface
+            ? $deflatorBinaryName
+            : self::findABinary($deflatorBinaryName, static::getDefaultDeflatorBinaryName(), $finder);
+
         try {
             $outputParser = new ZipOutputParser(self::$zipDateFormat);
         } catch (\InvalidArgumentException $e) {
-            throw new \RuntimeException(sprintf(
-                'Failed to get a new instance of %s',
-                get_called_class()), $e->getCode(), $e
+            throw new \RuntimeException(
+                sprintf('Failed to get a new instance of %s', get_called_class()),
+                $e->getCode(),
+                $e
             );
         }
 
         if (null === $inflator) {
-            throw new \RuntimeException(sprintf('Unable to create the inflator'));
+            throw new \RuntimeException('Unable to create the inflator');
         }
 
         if (null === $deflator) {
-            throw new \RuntimeException(sprintf('Unable to create the deflator'));
+            throw new \RuntimeException('Unable to create the deflator');
         }
 
         return new static($outputParser, $manager, $inflator, $deflator);
-    }    
-    
-    
-    private static function findABinary($wish, array $defaults, ExecutableFinder $finder)
+    }
+
+    private static function findABinary($wish, array $defaults, ExecutableFinder $finder): ?ProcessBuilderFactory
     {
-        
         $possibles = $wish ? (array) $wish : $defaults;
-        $binary = null;
 
         foreach ($possibles as $possible) {
             if (null !== $found = $finder->find($possible)) {
-                $binary = new ProcessBuilderFactory($found);
-                break;
+                return new ProcessBuilderFactory($found);
             }
         }
 
-        return $binary;
-    }    
+        return null;
+    }
 }

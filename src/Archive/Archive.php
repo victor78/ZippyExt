@@ -1,23 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Victor78\ZippyExt\Archive;
 
 use Alchemy\Zippy\Archive\Archive as BaseArchive;
-use Alchemy\Zippy\Adapter\AdapterInterface;
-use Alchemy\Zippy\Resource\ResourceManager;
-use Alchemy\Zippy\Adapter\Resource\ResourceInterface;
+use Alchemy\Zippy\Archive\ArchiveInterface;
 
 /**
- * Represents an archive
+ * Represents an archive with optional password support.
  */
-class Archive extends BaseArchive implements \Alchemy\Zippy\Archive\ArchiveInterface
+class Archive extends BaseArchive implements ArchiveInterface
 {
-    /**
-     * @inheritdoc
-     */
-    public function extract($toDirectory, $password = null)
+    public function extract($toDirectory, ?string $password = null): static
     {
-        if ($password) {
+        if ($password !== null && method_exists($this->adapter, 'setPassword')) {
             $this->adapter->setPassword($password);
         }
         $this->adapter->extract($this->resource, $toDirectory);
@@ -25,15 +22,11 @@ class Archive extends BaseArchive implements \Alchemy\Zippy\Archive\ArchiveInter
         return $this;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function extractMembers($members, $toDirectory = null, $password = null)
+    public function extractMembers($members, $toDirectory = null, ?string $password = null): static
     {
-        if ($password) {
+        if ($password !== null && method_exists($this->adapter, 'setPassword')) {
             $this->adapter->setPassword($password);
         }
-        
         $this->adapter->extractMembers($this->resource, $members, $toDirectory);
 
         return $this;
