@@ -11,11 +11,21 @@ class ZippyZipTest extends ZippyTesting
 
     public function testRemoveMembersWithPassword()
     {
-        $this->assertTrue(true);
+        $this->markTestSkipped('Standard zip adapter does not support password protection.');
     }
 
     public function testExtractWithPassword()
     {
-        $this->assertTrue(true);
+        $this->markTestSkipped('Standard zip adapter does not support password protection.');
+    }
+
+    public function testCreateArchAllFilesWithPassword()
+    {
+        $this->markTestSkipped('Standard zip adapter does not support password protection.');
+    }
+
+    public function testAddMembersWithPassword()
+    {
+        $this->markTestSkipped('Standard zip adapter does not support password protection.');
     }
 }

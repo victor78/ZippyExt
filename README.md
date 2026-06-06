@@ -1,11 +1,16 @@
 # ZippyExt
-ZippyExt (aka ZippyExtended)  is the libruary extended over [Zippy](https://github.com/alchemy-fr/Zippy) with providing the strategy and the adapter for using 7-Zip, including supporting passwords.
+ZippyExt (aka ZippyExtended) is a library extended over [Zippy](https://github.com/alchemy-fr/Zippy) providing the strategy and adapter for using 7-Zip, including password support.
+
+## Requirements
+
+- PHP >= 7.0
+- [7-Zip](https://www.7-zip.org/) (`7za` binary in `PATH`) — required only for 7zip adapter
 
 ## Installation
 
 The only supported installation method is via [Composer](https://getcomposer.org). Run the following command to require ZippyExt in your project:
 
-```
+```bash
 composer require victor78/zippy-ext
 ```
 
@@ -26,13 +31,13 @@ ZippyExt currently supports the following drivers and file formats:
   - .tar.gz
   - .tar.bz2
 - 7zip
-  - .zip
-  
-  ## Getting started
+  - .zip (with optional AES-256 password encryption)
+
+## Getting started
 
 All the following code samples assume that ZippyExt is loaded and available as `$zippy`. You need the following code (or variation of) to load ZippyExt:
 
-```
+```php
 <?php
 
 use Victor78\ZippyExt\Zippy;
@@ -77,26 +82,37 @@ $archive = $zippy->create('archive.zip', array(
 ```
 
 ### Use 7zip
-If you need to use 7zip archiving to create zip archive, you should use fourth parameter:
+
+If you need to use 7zip archiving to create a zip archive, use the fourth parameter:
+
 ```php
-// Creates an archive.zip by 7zip engine
+// Creates an archive.zip using the 7zip engine
 $archive = $zippy->create('archive.zip', $files, true, '7zip');
 ```
-And if you want to create the encrypted archive, you can use fifth parameter:
+
+To create an AES-256 encrypted archive, pass the password as the fifth parameter:
+
 ```php
-// Creates an archive.zip with AES-256 encryption and your password 
-$archive = $zippy->create('archive.zip', $files, true, '7zip', 'some_your_password');
+// Creates an archive.zip with AES-256 encryption
+$archive = $zippy->create('archive.zip', $files, true, '7zip', 'your_password');
 ```
-To extract 7zip with password:
+
+To open and extract a password-protected 7zip archive:
+
 ```php
-//open archive with your password
-$archive = $zippy->open('archive.zip', '7zip',  'some_your_password');
-$archiveZip->extract('folder_for_extracted');
+// Open archive with password
+$archive = $zippy->open('archive.zip', '7zip', 'your_password');
+$archive->extract('folder_for_extracted');
 ```
+
+## Known Limitations
+
+- Password protection is only supported with the **7zip adapter**. Standard zip and tar adapters ignore the password parameter.
+- `extractMembers()` is not supported for the 7zip adapter (use `extract()` instead).
 
 ## Documentation
 
-Documentation in English and in Russian here, in [wiki](https://github.com/victor78/ZippyExt/wiki).
+Documentation in English and Russian is available in the [wiki](https://github.com/victor78/ZippyExt/wiki).
 
 ## License
 

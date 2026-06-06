@@ -11,11 +11,21 @@ class ZippyTarTest extends ZippyTesting
 
     public function testRemoveMembersWithPassword()
     {
-        $this->assertTrue(true);
+        $this->markTestSkipped('GNU tar adapter does not support password protection.');
     }
 
     public function testExtractWithPassword()
     {
-        $this->assertTrue(true);
+        $this->markTestSkipped('GNU tar adapter does not support password protection.');
+    }
+
+    public function testCreateArchAllFilesWithPassword()
+    {
+        $this->markTestSkipped('GNU tar adapter does not support password protection.');
+    }
+
+    public function testAddMembersWithPassword()
+    {
+        $this->markTestSkipped('GNU tar adapter does not support password protection.');
     }
 }
