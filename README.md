@@ -122,6 +122,9 @@ $archive->extract('folder_for_extracted');
 
 - Password protection is only supported with the **7zip adapter**. Standard zip and tar adapters ignore the password parameter.
 - `extractMembers()` is not supported for the 7zip adapter (use `extract()` instead).
+- `.zip` is ambiguous: by default, `open('file.zip')` may resolve to standard zip strategy.
+  If you need 7zip-specific behavior (including password flow), pass type explicitly:
+  `open('file.zip', '7zip', 'your_password')`.
 
 ## Documentation
 

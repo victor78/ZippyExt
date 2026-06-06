@@ -64,6 +64,8 @@ class Zip7zipVersionProbe implements VersionProbeInterface
             return false;
         }
 
-        return stripos($process->getOutput(), '7-Zip') !== false;
+        $combinedOutput = $process->getOutput() . PHP_EOL . $process->getErrorOutput();
+
+        return stripos($combinedOutput, '7-Zip') !== false;
     }
 }

@@ -67,7 +67,7 @@ class Zippy extends \Alchemy\Zippy\Zippy
         try {
             $adapter = $this->getAdapterFor($this->sanitizeExtension((string) $type));
             if (method_exists($adapter, 'setPassword')) {
-                $adapter->setPassword($password);
+                $adapter->setPassword($this->normalizePassword($password));
             }
             return $adapter->create($path, $files, $recursive);
         } catch (ExceptionInterface $e) {
@@ -97,12 +97,21 @@ class Zippy extends \Alchemy\Zippy\Zippy
         try {
             $adapter = $this->getAdapterFor($this->sanitizeExtension((string) $type));
             if (method_exists($adapter, 'setPassword')) {
-                $adapter->setPassword($password);
+                $adapter->setPassword($this->normalizePassword($password));
             }
             return $adapter->open($path);
         } catch (ExceptionInterface $e) {
             throw new RuntimeException('Unable to open archive', $e->getCode(), $e);
         }
+    }
+
+    private function normalizePassword($password): ?string
+    {
+        if ($password === null || $password === '') {
+            return null;
+        }
+
+        return (string) $password;
     }
 
     /**

@@ -5,6 +5,7 @@ namespace tests\unit;
 require_once 'FileHelper.php';
 
 use Victor78\ZippyExt\Zippy;
+use Symfony\Component\Process\ExecutableFinder;
 use PHPUnit\Framework\TestCase;
 class ZippyTesting extends TestCase
 {
@@ -293,8 +294,6 @@ class ZippyTesting extends TestCase
         $adapter = $zippy->getAdapterFor($this->type);
         $versionDeflator = $adapter->getDeflatorVersion();
         $versionInflator = $adapter->getInflatorVersion();
-        echo 'Deflator version is '.$versionDeflator.PHP_EOL;
-        echo 'Inflator version is '.$versionInflator.PHP_EOL;
 
         if ($this->type === '7zip') {
             $this->assertTrue(is_numeric($versionDeflator));
@@ -313,15 +312,14 @@ class ZippyTesting extends TestCase
 
     private function has7zipBinary(): bool
     {
-        $bins = array('7za', '7z');
+        $finder = new ExecutableFinder();
 
-        foreach ($bins as $bin) {
-            $result = trim((string) shell_exec(sprintf('command -v %s 2>/dev/null', escapeshellarg($bin))));
-            if ($result !== '') {
+        foreach (['7za', '7z'] as $bin) {
+            if ($finder->find($bin) !== null) {
                 return true;
             }
-        }
+         }
 
-        return false;
+         return false;
     }
 }

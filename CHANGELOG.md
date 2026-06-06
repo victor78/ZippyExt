@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] — 2026-06-07
+
+### Fixed
+- `Zippy::create()` / `Zippy::open()` now normalize password input before passing it to adapters,
+  preventing strict-type errors for non-string password values.
+- `Zip7zipVersionProbe` now checks 7-Zip signature in both stdout and stderr.
+
+### Changed
+- Test environment binary detection now uses `Symfony\Component\Process\ExecutableFinder`
+  instead of `shell_exec`, improving compatibility on restricted environments.
+- Removed noisy version `echo` output from integration tests.
+- README now explicitly documents `.zip` ambiguity and advises forcing `'7zip'` type for
+  7zip-specific behavior.
+
 ## [1.0.1] — 2026-06-07
 
 ### Fixed
@@ -70,7 +84,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial stable release.
 
-[Unreleased]: https://github.com/victor78/ZippyExt/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/victor78/ZippyExt/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/victor78/ZippyExt/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/victor78/ZippyExt/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/victor78/ZippyExt/compare/v0.0.5...v1.0.0
 [0.0.5]: https://github.com/victor78/ZippyExt/compare/0.0.4...v0.0.5
