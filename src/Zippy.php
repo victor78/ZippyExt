@@ -60,6 +60,10 @@ class Zippy extends \Alchemy\Zippy\Zippy
             $type = $this->guessAdapterExtension($path);
         }
 
+        if ($type === null) {
+            throw new RuntimeException(sprintf('Unable to guess archive type from path "%s"', (string) $path));
+        }
+
         try {
             $adapter = $this->getAdapterFor($this->sanitizeExtension((string) $type));
             if (method_exists($adapter, 'setPassword')) {
@@ -86,6 +90,10 @@ class Zippy extends \Alchemy\Zippy\Zippy
             $type = $this->guessAdapterExtension($path);
         }
 
+        if ($type === null) {
+            throw new RuntimeException(sprintf('Unable to guess archive type from path "%s"', (string) $path));
+        }
+
         try {
             $adapter = $this->getAdapterFor($this->sanitizeExtension((string) $type));
             if (method_exists($adapter, 'setPassword')) {
@@ -105,7 +113,7 @@ class Zippy extends \Alchemy\Zippy\Zippy
     {
         $path = strtolower(trim($path));
         foreach ($this->getStrategies() as $extension => $strategy) {
-            if ($extension === substr($path, (strlen($extension) * -1))) {
+            if (str_ends_with($path, $extension)) {
                 return $extension;
             }
         }

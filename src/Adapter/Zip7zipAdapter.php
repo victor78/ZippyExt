@@ -167,12 +167,12 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
 
         $members = [];
         foreach ($records as $record) {
-            // Skip archive metadata blocks (`Path = archive.zip`, `Type = zip`, ...).
-            if (isset($record['Type'])) {
+            // Item records always include both Path and Folder in -slt output.
+            if (!isset($record['Path'], $record['Folder'])) {
                 continue;
             }
 
-            $path = $record['Path'] ?? '';
+            $path = (string) $record['Path'];
             if ($path === '') {
                 continue;
             }
@@ -447,7 +447,7 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
 
     private function sanitizeCommandLine(string $commandLine): string
     {
-        return (string) preg_replace('/-p(?:"[^"]*"|\'[^\']*\'|\S+)/', '-p*****', $commandLine);
+        return (string) preg_replace('/-p(?:\s+)?(?:"[^"]*"|\'[^\']*\'|\S+)/', '-p*****', $commandLine);
     }
 
     private function parseMtime(?string $value): \DateTime

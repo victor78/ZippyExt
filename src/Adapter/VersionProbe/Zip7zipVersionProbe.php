@@ -22,6 +22,7 @@ class Zip7zipVersionProbe implements VersionProbeInterface
     public function setInflator(ProcessBuilderFactoryInterface $inflator): static
     {
         $this->inflator = $inflator;
+        $this->isSupported = null;
 
         return $this;
     }
@@ -32,6 +33,7 @@ class Zip7zipVersionProbe implements VersionProbeInterface
     public function setDeflator(ProcessBuilderFactoryInterface $deflator): static
     {
         $this->deflator = $deflator;
+        $this->isSupported = null;
 
         return $this;
     }
@@ -45,19 +47,23 @@ class Zip7zipVersionProbe implements VersionProbeInterface
             return $this->isSupported;
         }
 
-        $processInflate = $this->inflator->create()->getProcess();
-        $processInflate->run();
+        $inflatorOk = $this->isFactorySupported($this->inflator);
+        $deflatorOk = $this->isFactorySupported($this->deflator);
 
-        if (false === $processInflate->isSuccessful()) {
-            return $this->isSupported = VersionProbeInterface::PROBE_NOTSUPPORTED;
-        }
-
-        $output = $processInflate->getOutput();
-        $inflatorOk = false !== stripos($output, '7-Zip');
-
-
-        return $this->isSupported = $inflatorOk
+        return $this->isSupported = ($inflatorOk && $deflatorOk)
             ? VersionProbeInterface::PROBE_OK
             : VersionProbeInterface::PROBE_NOTSUPPORTED;
+    }
+
+    private function isFactorySupported(ProcessBuilderFactoryInterface $factory): bool
+    {
+        $process = $factory->create()->getProcess();
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            return false;
+        }
+
+        return stripos($process->getOutput(), '7-Zip') !== false;
     }
 }

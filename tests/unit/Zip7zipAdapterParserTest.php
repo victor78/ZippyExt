@@ -78,4 +78,28 @@ TXT;
         $this->assertSame(5, $members[0]['size']);
         $this->assertFalse($members[0]['is_dir']);
     }
+
+    public function testSanitizeCommandLineMasksInlinePassword(): void
+    {
+        $adapter = $this->createAdapter();
+        $method = new \ReflectionMethod($adapter, 'sanitizeCommandLine');
+        $method->setAccessible(true);
+
+        $sanitized = $method->invoke($adapter, '7za a -pmySecret archive.zip file.txt');
+
+        $this->assertStringNotContainsString('mySecret', $sanitized);
+        $this->assertStringContainsString('-p*****', $sanitized);
+    }
+
+    public function testSanitizeCommandLineMasksSpacedPassword(): void
+    {
+        $adapter = $this->createAdapter();
+        $method = new \ReflectionMethod($adapter, 'sanitizeCommandLine');
+        $method->setAccessible(true);
+
+        $sanitized = $method->invoke($adapter, '7za a -p "my Secret" archive.zip file.txt');
+
+        $this->assertStringNotContainsString('my Secret', $sanitized);
+        $this->assertStringContainsString('-p*****', $sanitized);
+    }
 }
