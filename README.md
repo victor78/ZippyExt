@@ -10,7 +10,7 @@ ZippyExt (aka ZippyExtended) is a library extended over [Zippy](https://github.c
 ## Requirements
 
 - PHP >= 8.1
-- [7-Zip](https://www.7-zip.org/) (`7za` binary in `PATH`) — required only for 7zip adapter
+- [7-Zip](https://www.7-zip.org/) (`7za` or `7z` in `PATH`) — required only for 7zip adapter
 
 ## PHP Compatibility
 

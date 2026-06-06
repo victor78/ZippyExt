@@ -14,7 +14,8 @@ class Archive extends BaseArchive implements ArchiveInterface
 {
     public function extract($toDirectory, ?string $password = null): static
     {
-        if ($password !== null && method_exists($this->adapter, 'setPassword')) {
+        if (method_exists($this->adapter, 'setPassword')) {
+            // Explicitly set/reset password to avoid state leakage between calls.
             $this->adapter->setPassword($password);
         }
         $this->adapter->extract($this->resource, $toDirectory);
@@ -24,7 +25,8 @@ class Archive extends BaseArchive implements ArchiveInterface
 
     public function extractMembers($members, $toDirectory = null, ?string $password = null): static
     {
-        if ($password !== null && method_exists($this->adapter, 'setPassword')) {
+        if (method_exists($this->adapter, 'setPassword')) {
+            // Explicitly set/reset password to avoid state leakage between calls.
             $this->adapter->setPassword($password);
         }
         $this->adapter->extractMembers($this->resource, $members, $toDirectory);
