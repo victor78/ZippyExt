@@ -12,6 +12,14 @@ class FileHelper
         $this->assetsDir = $GLOBALS['assets'];
         $this->arenaDir = $GLOBALS['files_arena'];
         $this->archiveDir = $GLOBALS['archives_arena'];
+
+        if (!is_dir($this->arenaDir)) {
+            mkdir($this->arenaDir, 0777, true);
+        }
+
+        if (!is_dir($this->archiveDir)) {
+            mkdir($this->archiveDir, 0777, true);
+        }
     }
     
     static public function create()
@@ -35,7 +43,9 @@ class FileHelper
     public function makeArenaFolder($folderName)
     {
         $pathname = $this->arenaDir.DIRECTORY_SEPARATOR.$folderName;
-        mkdir($pathname);
+        if (!is_dir($pathname)) {
+            mkdir($pathname, 0777, true);
+        }
         return $pathname;
     }
     

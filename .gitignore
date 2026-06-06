@@ -1,3 +1,8 @@
 /nbproject/
 /vendor/
+/context/
+/.idea/
+.phpunit.result.cache
+/tests/files_arena/
+/tests/archives_arena/
 composer.lock

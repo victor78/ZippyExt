@@ -1,7 +1,6 @@
 {
     "name": "victor78/zippy-ext",
     "type": "zippy-extension",
-    "version": "0.0.4",
     "description": "The 7-Zip integration for the Zippy.",
     "keywords": ["zippy", "7zip", "7-zip", "archiver", "archivator", "archive", "zip"],
     "license": "MIT",
@@ -27,5 +26,8 @@
         "psr-4": {
             "Victor78\\ZippyExt\\": "src/"
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6"
     }
 }

@@ -252,16 +252,11 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
     
     public function parseVersion($output)
     {
-        $lines = array_values(array_filter(explode("\n", $output, 3)));
-
-        $chunks = explode(' ', $lines[1], 4);
-        if (2 > count($chunks)) {
-            return null;
+        if (preg_match('/\b(\d+(?:\.\d+)+)\b/', $output, $matches)) {
+            return $matches[1];
         }
 
-        $version = $chunks[2];
-
-        return $version;
+        return null;
     }
 
     /**
@@ -396,7 +391,7 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
      */
     protected function doExtractMembers(ResourceInterface $resource, $members, $to, $overwrite = false)
     {
-        throw new DomainException('Impossible to extract members with 7za.');
+        throw new \DomainException('Impossible to extract members with 7za.');
     }
     
     /**

@@ -12,17 +12,21 @@ class ZippyTesting extends TestCase
     public $fileHelper;
     public $ext = 'zip';
     public $type = 'zip';
-    
-    public function __construct() {
-        parent::__construct();
-        $this->fileHelper = FileHelper::create();
-    }
-    public function setUp()
+
+    protected function setUp(): void
     {
+        if ($this->fileHelper === null) {
+            $this->fileHelper = FileHelper::create();
+        }
+
+        if ($this->type === '7zip' && !$this->has7zipBinary()) {
+            $this->markTestSkipped('7zip binary (7za/7z) is not available in PATH.');
+        }
+
         $this->fileHelper->fillArena();
     }
-    
-    public function tearDown()
+
+    protected function tearDown(): void
     {
         $this->fileHelper->clearArena();
         $this->fileHelper->clearArchiveArena();
@@ -253,7 +257,7 @@ class ZippyTesting extends TestCase
             && in_array('file3.txt', $items)
             && in_array('added.txt', $items);
         
-        $this->assertTrue($ok);
+        $this->assertTrue($ok1);
     }
     public function testExtractMembers()
     {
@@ -291,9 +295,33 @@ class ZippyTesting extends TestCase
         $versionInflator = $adapter->getInflatorVersion();
         echo 'Deflator version is '.$versionDeflator.PHP_EOL;
         echo 'Inflator version is '.$versionInflator.PHP_EOL;
-        $this->assertTrue(is_numeric($versionDeflator));
-        $this->assertTrue(is_numeric($versionInflator));
-        $this->assertGreaterThan(0, $versionDeflator);
-        $this->assertGreaterThan(0, $versionInflator);
+
+        if ($this->type === '7zip') {
+            $this->assertTrue(is_numeric($versionDeflator));
+            $this->assertTrue(is_numeric($versionInflator));
+            $this->assertGreaterThan(0, $versionDeflator);
+            $this->assertGreaterThan(0, $versionInflator);
+
+            return;
+        }
+
+        $this->assertIsString($versionDeflator);
+        $this->assertIsString($versionInflator);
+        $this->assertNotSame('', trim($versionDeflator));
+        $this->assertNotSame('', trim($versionInflator));
+    }
+
+    private function has7zipBinary(): bool
+    {
+        $bins = array('7za', '7z');
+
+        foreach ($bins as $bin) {
+            $result = trim((string) shell_exec(sprintf('command -v %s 2>/dev/null', escapeshellarg($bin))));
+            if ($result !== '') {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -6,10 +6,6 @@ require_once 'ZippyTesting.php';
 
 class Zippy7zipTest extends ZippyTesting
 {
-    
-    public function __construct() {
-        parent::__construct();
-        $this->type = '7zip';
-        $this->ext = 'zip';
-    }
+    public $type = '7zip';
+    public $ext = 'zip';
 }

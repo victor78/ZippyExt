@@ -2,6 +2,10 @@
 
 namespace Victor78\ZippyExt;
 
+use Alchemy\Zippy\Exception\{
+    ExceptionInterface,
+    RuntimeException
+};
 use Victor78\ZippyExt\FileStrategy\Zip7zipFileStrategy;
 use Alchemy\Zippy\FileStrategy\{
     ZipFileStrategy,
@@ -60,7 +64,8 @@ class Zippy extends \Alchemy\Zippy\Zippy
         
         try {
             $adapter = $this->getAdapterFor($this->sanitizeExtension($type));
-            if (method_exists($adapter, 'setPassword') && $password){
+            if (method_exists($adapter, 'setPassword')) {
+                // Explicitly set/reset password to avoid leaking state between operations.
                 $adapter->setPassword($password);
             }
             return $adapter->create($path, $files, $recursive);
@@ -86,7 +91,8 @@ class Zippy extends \Alchemy\Zippy\Zippy
 
         try {
             $adapter = $this->getAdapterFor($this->sanitizeExtension($type));
-            if (method_exists($adapter, 'setPassword') && $password){
+            if (method_exists($adapter, 'setPassword')) {
+                // Explicitly set/reset password to avoid leaking state between operations.
                 $adapter->setPassword($password);
             }
             return $adapter->open($path);
