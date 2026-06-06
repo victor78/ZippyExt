@@ -83,7 +83,7 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
         if (!$process->isSuccessful()) {
             throw new RuntimeException(sprintf(
                 'Unable to execute the following command %s {output: %s}',
-                $process->getCommandLine(),
+                $this->sanitizeCommandLine($process->getCommandLine()),
                 $process->getErrorOutput()
             ));
         }
@@ -95,6 +95,7 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
     {
         $process = $this->deflator->create()
             ->add('l')
+            ->add('-slt')
             ->add($resource->getResource())
             ->getProcess();
 
@@ -103,7 +104,7 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
         if (!$process->isSuccessful()) {
             throw new RuntimeException(sprintf(
                 'Unable to execute the following command %s {output: %s}',
-                $process->getCommandLine(),
+                $this->sanitizeCommandLine($process->getCommandLine()),
                 $process->getErrorOutput()
             ));
         }
@@ -126,11 +127,78 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
 
     public function parseFileListing(string $output): array
     {
-        $lines = array_values(array_filter(explode("\n", $output)));
-        array_shift($lines);
-        array_shift($lines);
-        array_shift($lines);
+        $members = $this->parseSltFileListing($output);
+        if (count($members) > 0) {
+            return $members;
+        }
+
+        // Fallback for legacy/non-slt output formats.
+        return $this->parseLegacyFileListing($output);
+    }
+
+    private function parseSltFileListing(string $output): array
+    {
+        $lines = preg_split('/\R/', $output) ?: [];
+        $records = [];
+        $current = [];
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+
+            if ($line === '') {
+                if (isset($current['Path'])) {
+                    $records[] = $current;
+                }
+                $current = [];
+                continue;
+            }
+
+            if (!str_contains($line, ' = ')) {
+                continue;
+            }
+
+            [$key, $value] = explode(' = ', $line, 2);
+            $current[$key] = $value;
+        }
+
+        if (isset($current['Path'])) {
+            $records[] = $current;
+        }
+
         $members = [];
+        foreach ($records as $record) {
+            // Skip archive metadata blocks (`Path = archive.zip`, `Type = zip`, ...).
+            if (isset($record['Type'])) {
+                continue;
+            }
+
+            $path = $record['Path'] ?? '';
+            if ($path === '') {
+                continue;
+            }
+
+            $isDir = (($record['Folder'] ?? '-') === '+');
+            $size = (int) ($record['Size'] ?? 0);
+            $mtime = $this->parseMtime($record['Modified'] ?? null);
+
+            $members[] = [
+                'location' => $path,
+                'size'     => $size,
+                'mtime'    => $mtime,
+                'is_dir'   => $isDir,
+            ];
+        }
+
+        return $members;
+    }
+
+    private function parseLegacyFileListing(string $output): array
+    {
+         $lines = array_values(array_filter(explode("\n", $output)));
+         array_shift($lines);
+         array_shift($lines);
+         array_shift($lines);
+         $members = [];
 
         foreach ($lines as $line) {
             $matches = [];
@@ -150,18 +218,11 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
             }
 
             $date = $chunks[1] . ' ' . $chunks[2];
-            $mtime = \DateTime::createFromFormat('Y-m-d H:i:s', $date);
-
-            if ($mtime === false) {
-                $mtime = \DateTime::createFromFormat('H:i Y-m-d', $date);
-                if ($mtime === false) {
-                    $mtime = new \DateTime($date);
-                }
-            }
+            $mtime = $this->parseMtime($date);
 
             $members[] = [
                 'location' => $chunks[6],
-                'size'     => $chunks[4],
+                'size'     => (int) $chunks[4],
                 'mtime'    => $mtime,
                 'is_dir'   => '/' === substr($chunks[6], -1),
             ];
@@ -208,7 +269,7 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
         if (!$process->isSuccessful()) {
             throw new RuntimeException(sprintf(
                 'Unable to execute the following command %s {output: %s}',
-                $process->getCommandLine(),
+                $this->sanitizeCommandLine($process->getCommandLine()),
                 $process->getErrorOutput()
             ));
         }
@@ -222,7 +283,7 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
         if (!$process->isSuccessful()) {
             throw new RuntimeException(sprintf(
                 'Unable to execute the following command %s {output: %s}',
-                $process->getCommandLine(),
+                $this->sanitizeCommandLine($process->getCommandLine()),
                 $process->getErrorOutput()
             ));
         }
@@ -247,7 +308,7 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
         if (!$process->isSuccessful()) {
             throw new RuntimeException(sprintf(
                 'Unable to execute the following command %s {output: %s}',
-                $process->getCommandLine(),
+                $this->sanitizeCommandLine($process->getCommandLine()),
                 $process->getErrorOutput()
             ));
         }
@@ -273,7 +334,7 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
         if (!$process->isSuccessful()) {
             throw new RuntimeException(sprintf(
                 'Unable to execute the following command %s {output: %s}',
-                $process->getCommandLine(),
+                $this->sanitizeCommandLine($process->getCommandLine()),
                 $process->getErrorOutput()
             ));
         }
@@ -288,12 +349,12 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
 
     public static function getDefaultDeflatorBinaryName(): array
     {
-        return ['7za'];
+        return ['7za', '7z'];
     }
 
     public static function getDefaultInflatorBinaryName(): array
     {
-        return ['7za'];
+        return ['7za', '7z'];
     }
 
     protected function doExtract(ResourceInterface $resource, $to): \SplFileInfo
@@ -323,7 +384,7 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
         if (!$process->isSuccessful()) {
             throw new RuntimeException(sprintf(
                 'Unable to execute the following command %s {output: %s}',
-                $process->getCommandLine(),
+                $this->sanitizeCommandLine($process->getCommandLine()),
                 $process->getErrorOutput()
             ));
         }
@@ -383,4 +444,30 @@ class Zip7zipAdapter extends AbstractBinaryAdapter
 
         return null;
     }
+
+    private function sanitizeCommandLine(string $commandLine): string
+    {
+        return (string) preg_replace('/-p(?:"[^"]*"|\'[^\']*\'|\S+)/', '-p*****', $commandLine);
+    }
+
+    private function parseMtime(?string $value): \DateTime
+     {
+         $date = trim((string) $value);
+         if ($date === '') {
+            return new \DateTime('@0');
+         }
+ 
+         foreach (['Y-m-d H:i:s', 'H:i Y-m-d'] as $format) {
+            $parsed = \DateTime::createFromFormat($format, $date);
+             if ($parsed !== false) {
+                 return $parsed;
+             }
+         }
+ 
+         try {
+            return new \DateTime($date);
+         } catch (\Exception) {
+            return new \DateTime('@0');
+         }
+     }
 }
